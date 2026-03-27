@@ -1,0 +1,125 @@
+﻿body {
+    margin: 0;
+    height: 100vh; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;     
+    background: url('background.jpg') no-repeat center center fixed;
+    background-size: cover;
+    font-family: Arial, sans-serif;
+}
+
+header {
+    width: 100%;
+    padding: 20px 50px;
+}
+
+header .logo {
+    height: 194px;
+    width: 285px;
+    display: block;
+    margin-left: 0; 
+}
+
+.loginbox {
+    width: 450px;
+    height: 600px;
+    padding: 60px 40px 40px;
+    box-sizing: border-box;
+    background: rgb(231, 231, 231);
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    margin-top: 20px;
+}
+
+.loginbox h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.loginbox h3 {
+    margin: 5px 0 20px 0;
+    font-size: 18px;
+    color: #3E8EDE;
+    text-align: center;
+}
+
+.loginbox h2 {
+    margin-bottom: 25px;
+    color: crimson;
+    text-align: center;
+}
+
+.lblemail, .lblpassword {
+    font-weight: bold;
+    color: #0094ff;
+    display: block;
+    margin: 5px;
+    text-align: left ;
+    display: block;
+}
+
+.txtemail, .txtpassword, .btnsubmit {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.txtemail, .txtpassword {
+    border: none;
+    border-bottom: 3px solid #fff;
+    outline: none;
+    height: 40px;
+    color: #000000;
+    font-size: 16px;
+    background-color: transparent;
+}
+
+.placeholder {
+    color: rgba(255,255,255,.5);
+}
+
+.btnsubmit {
+    border: none;
+    outline: none;
+    height: 40px;
+    font-size: 16px;
+    color: #dd6d6d;
+    background-color: rgba(255,255,255,.5);
+    cursor: pointer;
+    border-radius: 20px;
+    transition: .3s ease-in-out;
+}
+
+.btnsubmit:hover {
+    background-color: #fff;
+}
+
+.btnforget, .btnsignup {
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+    color: #0094ff;
+    text-align: center;
+    display: block;
+    margin-top: 10px;
+}
+
+.btnforget:hover, .btnsignup:hover {
+    text-decoration: underline;
+}
+
+h4 {
+    color: #0094ff;
+    font-size: 14px;
+}
+
+.loginbox .remember {
+    margin-bottom: 10px;
+    color: #ff0000;
+    font-weight: 400;
+    font-size: 18px;
+}
