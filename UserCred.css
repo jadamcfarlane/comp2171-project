@@ -1,4 +1,4 @@
-﻿/* --- Global & Layout --- */
+﻿
 body {
     margin: 0;
     padding: 0;
@@ -7,7 +7,7 @@ body {
 }
 
 .user-container {
-    width: 480px; /* Slightly wider to accommodate the better table */
+    width: 480px; 
     margin: 50px auto;
     background: #ffffff; 
     padding: 35px;
@@ -15,7 +15,7 @@ body {
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
-/* --- Navigation Header --- */
+
 header {
     background: #fff;
     padding: 10px 40px;
@@ -48,7 +48,6 @@ header ul.navigation li a:hover {
     color: white;
 }
 
-/* --- Typography --- */
 h2 {
     text-align: center;
     margin-top: 0;
@@ -66,7 +65,7 @@ h3 {
     padding-left: 10px;
 }
 
-/* --- Form Elements --- */
+
 .form-group {
     margin-bottom: 20px;
     display: flex;
@@ -97,7 +96,6 @@ label {
     box-shadow: 0 0 0 3px rgba(62,142,222,0.1);
 }
 
-/* --- Buttons --- */
 .btn-row {
     display: flex;
     justify-content: space-between;
@@ -106,13 +104,13 @@ label {
 }
 
 .btnsubmit {
-    flex: 1; /* Makes buttons equal width */
+    flex: 1; 
     border: none;
     height: 42px;
     font-size: 14px;
     font-weight: bold;
     color: white;
-    background-color: #89CFF0; /* Project theme light blue */
+    background-color: #89CFF0; 
     cursor: pointer;
     border-radius: 21px;
     transition: 0.3s;
@@ -131,7 +129,7 @@ label {
     background-color: #ee5253;
 }
 
-/* --- Messages --- */
+
 .message {
     margin-top: 20px;
     text-align: center;
@@ -139,7 +137,6 @@ label {
     min-height: 20px;
 }
 
-/* --- Modern Table --- */
 .user-table {
     width: 100%;
     border-collapse: separate;
@@ -171,7 +168,7 @@ label {
     border-bottom: none;
 }
 
-/* Row Roles */
+
 .role-admin { background-color: #fff9f9; }
 .role-user { background-color: #ffffff; }
 
@@ -179,7 +176,7 @@ label {
     background-color: #f0f7ff;
 }
 
-/* Badges */
+
 .role-badge {
     display: inline-block;
     padding: 4px 10px;
@@ -192,7 +189,7 @@ label {
 .role-admin .role-badge { background-color: #ff6666; }
 .role-user .role-badge { background-color: #66b3ff; }
 
-/* Action Buttons in Table */
+
 .edit-btn {
     background-color: transparent;
     color: #3E8EDE;
