@@ -1,88 +1,82 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.sql.*" %>
-<%@ page import="java.util.*" %>
+<%@ page import="java.sql.*, java.util.*" %>
+<%@ include file="config.jsp" %>
+
 <%
 
-String connStr="jdbc:sqlserver://DESKTOP-KIRN4D4\\SQLEXPRESS;databaseName=Aquasol;encrypt=false;integratedSecurity=true";
+    String message="";
 
-Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-Connection con=DriverManager.getConnection(connStr);
+    String itemId=request.getParameter("itemId");
+    String quantity=request.getParameter("quantity");
 
-String message="";
+if(itemId != null && quantity != null){
+        try {
+            int id = Integer.parseInt(itemId);
+            int qty = Integer.parseInt(quantity);
 
-String itemId=request.getParameter("itemId");
-String quantity=request.getParameter("quantity");
+            String updateSql = "UPDATE Item SET Stock=Stock+?, LastAddedQty=? WHERE ItemID=?";
+            try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
+                ps.setInt(1, qty);
+                ps.setInt(2, qty);
+                ps.setInt(3, id);
+                ps.executeUpdate();
+            }
 
-if(itemId!=null && quantity!=null){
-    int id=Integer.parseInt(itemId);
-    int qty=Integer.parseInt(quantity);
+            String historySql = "INSERT INTO StockHistory(ItemID,QtyAdded) VALUES(?,?)";
+            try (PreparedStatement history = conn.prepareStatement(historySql)) {
+                history.setInt(1, id);
+                history.setInt(2, qty);
+                history.executeUpdate();
+            }
 
-    PreparedStatement ps=con.prepareStatement(
-    "UPDATE Item SET Stock=Stock+?, LastAddedQty=? WHERE ItemID=?");
-    ps.setInt(1,qty);
-    ps.setInt(2,qty);
-    ps.setInt(3,id);
-    ps.executeUpdate();
+            message = "Stock successfully added!";
+        } catch (Exception e) {
+            message = "Error updating stock: " + e.getMessage();
+        }
+    }
 
-    PreparedStatement history=con.prepareStatement(
-    "INSERT INTO StockHistory(ItemID,QtyAdded) VALUES(?,?)");
-    history.setInt(1,id);
-    history.setInt(2,qty);
-    history.executeUpdate();
+    int totalItems = 0, uniqueSKU = 0, lowStock = 0;
+    double inventoryValue = 0;
+    List<Map<String,String>> dropdownItems = new ArrayList<>();
+    List<Map<String,Object>> items = new ArrayList<>();
+    List<Map<String,Object>> lowItems = new ArrayList<>();
 
-    message="Stock successfully added!";
-}
+    try (Statement stmt = conn.createStatement()) {
+        // KPI Data
+        ResultSet rs1 = stmt.executeQuery("SELECT ISNULL(SUM(Stock),0), COUNT(*), " +
+                                        "(SELECT COUNT(*) FROM Item WHERE Stock<=10), " +
+                                        "ISNULL(SUM(Stock*Price),0) FROM Item");
+        if(rs1.next()) {
+            totalItems = rs1.getInt(1);
+            uniqueSKU = rs1.getInt(2);
+            lowStock = rs1.getInt(3);
+            inventoryValue = rs1.getDouble(4);
+        }
 
-Statement stmt=con.createStatement();
-ResultSet rs1=stmt.executeQuery("SELECT ISNULL(SUM(Stock),0) FROM Item");
-rs1.next();
-int totalItems=rs1.getInt(1);
+        // Dropdown & Table Data
+        ResultSet dr = stmt.executeQuery("SELECT ItemID, ItemName FROM Item ORDER BY ItemName");
+        while(dr.next()){
+            Map<String,String> row = new HashMap<>();
+            row.put("id", dr.getString("ItemID"));
+            row.put("name", dr.getString("ItemName"));
+            dropdownItems.add(row);
+        }
 
-ResultSet rs2=stmt.executeQuery("SELECT COUNT(*) FROM Item");
-rs2.next();
-int uniqueSKU=rs2.getInt(1);
-
-ResultSet rs3=stmt.executeQuery("SELECT COUNT(*) FROM Item WHERE Stock<=10");
-rs3.next();
-int lowStock=rs3.getInt(1);
-
-ResultSet rs4=stmt.executeQuery("SELECT ISNULL(SUM(Stock*Price),0) FROM Item");
-rs4.next();
-double inventoryValue=rs4.getDouble(1);
-
-List<Map<String,String>> dropdownItems=new ArrayList<>();
-PreparedStatement drop=con.prepareStatement("SELECT ItemID,ItemName FROM Item ORDER BY ItemName");
-ResultSet dr=drop.executeQuery();
-while(dr.next()){
-    Map<String,String> row=new HashMap<>();
-    row.put("id",dr.getString("ItemID"));
-    row.put("name",dr.getString("ItemName"));
-    dropdownItems.add(row);
-}
-
-List<Map<String,Object>> items=new ArrayList<>();
-PreparedStatement all=con.prepareStatement("SELECT ItemID, ItemName,Stock,LastAddedQty,LastSoldQty,(Stock*Price) AS Value FROM Item");
-ResultSet ai=all.executeQuery();
-while(ai.next()){
-    Map<String,Object> row=new HashMap<>();
-    row.put("ItemID", ai.getString("ItemID")); 
-    row.put("name",ai.getString("ItemName"));
-    row.put("stock",ai.getInt("Stock"));
-    row.put("added",ai.getInt("LastAddedQty"));
-    row.put("sold",ai.getInt("LastSoldQty"));
-    row.put("value",ai.getDouble("Value"));
-    items.add(row);
-}
-
-List<Map<String,Object>> lowItems=new ArrayList<>();
-PreparedStatement low=con.prepareStatement("SELECT ItemName,Stock FROM Item WHERE Stock<=10");
-ResultSet li=low.executeQuery();
-while(li.next()){
-    Map<String,Object> row=new HashMap<>();
-    row.put("name",li.getString("ItemName"));
-    row.put("stock",li.getInt("Stock"));
-    lowItems.add(row);
-}
+        ResultSet ai = stmt.executeQuery("SELECT ItemID, ItemName, Stock, LastAddedQty, LastSoldQty, (Stock*Price) AS Value FROM Item");
+        while(ai.next()){
+            Map<String,Object> row = new HashMap<>();
+            row.put("ItemID", ai.getString("ItemID")); 
+            row.put("name", ai.getString("ItemName"));
+            row.put("stock", ai.getInt("Stock"));
+            row.put("added", ai.getInt("LastAddedQty"));
+            row.put("sold", ai.getInt("LastSoldQty"));
+            row.put("value", ai.getDouble("Value"));
+            items.add(row);
+            if(ai.getInt("Stock") <= 10) lowItems.add(row);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
 %>
 
 <!DOCTYPE html>
@@ -122,7 +116,6 @@ while(li.next()){
     </div>
 
     <section class="kpi-grid kpi-grid-2x2">
-
         <article class="card kpi-large">
             <div class="card-title">Total Items in Stock</div>
             <div class="card-value"><%=totalItems%></div>
@@ -150,14 +143,14 @@ while(li.next()){
             <div class="card-title">Unique SKUs</div>
             <div class="card-value"><%=uniqueSKU%></div>
             <div class="inventory-summary">
-                    <% for(Map<String, Object> item : items) { %>
-                        <div class="stock-card stock-safe" style="display: block; width: 100%; margin: 8px 0;">
-                            <div class="stock-title">
-                                SKU: <%= item.get("ItemID") %> - <%= item.get("name") %>
-                            </div>
+                <% for(Map<String, Object> item : items) { %>
+                    <div class="stock-card stock-safe" style="display: block; width: 100%; margin: 8px 0;">
+                        <div class="stock-title">
+                            SKU: <%= item.get("ItemID") %> - <%= item.get("name") %>
                         </div>
-                    <% } %>
-                </div>
+                    </div>
+                <% } %>
+            </div>
         </article>
 
         <article class="card kpi-large">
@@ -179,7 +172,6 @@ while(li.next()){
             <div class="card-subrow"><span>+0%</span></div>
             <div class="card-compare">vs previous 30 days</div>
         </article>
-
     </section>
 </main>
 

@@ -1,15 +1,10 @@
 <%@ page import="java.sql.*, java.util.*" %>
+<%@ include file="config.jsp" %>
 <%
-    HttpSession sessionObj = request.getSession(false);
-    if (sessionObj == null || sessionObj.getAttribute("username") == null) {
-        response.sendRedirect("login.jsp");
-        return;
-    }
 
     String fromPage = request.getParameter("from");
     if (fromPage == null || fromPage.isEmpty()) { fromPage = "UPOS"; }
 
-    String connStr = "jdbc:sqlserver://DESKTOP-KIRN4D4\\SQLEXPRESS;databaseName=Aquasol;encrypt=false;integratedSecurity=true";
     String message = "";
     
     String name = request.getParameter("custName");
@@ -18,9 +13,6 @@
     String action = request.getParameter("action");
 
     try {
-        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        Connection conn = DriverManager.getConnection(connStr);
-
         if ("save".equals(action) && name != null && !name.isEmpty()) {
             PreparedStatement ps = conn.prepareStatement("INSERT INTO Customers (CustomerName, ContactNumber, Email) VALUES (?, ?, ?)");
             ps.setString(1, name);
@@ -36,21 +28,25 @@
         }
 
         // Load customers for the table
-        List<Map<String, String>>custList = new ArrayList<>();
-        ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM Customers ORDER BY CustomerID DESC");
-        while(rs.next()){
-            Map<String, String> c = new HashMap<>();
-            c.put("id", rs.getString("CustomerID"));
-            c.put("name", rs.getString("CustomerName"));
-            c.put("phone", rs.getString("ContactNumber"));
-            c.put("email", rs.getString("Email"));
-            custList.add(c);
+        List<Map<String, String>> custList = new ArrayList<>();
+        String selectSql = "SELECT CustomerID, CustomerName, ContactNumber, Email FROM Customers ORDER BY CustomerID DESC";
+        try (Statement stmt = conn.createStatement(); 
+             ResultSet rs = stmt.executeQuery(selectSql)) {
+            while(rs.next()){
+                Map<String, String> c = new HashMap<>();
+                c.put("id", rs.getString("CustomerID"));
+                c.put("name", rs.getString("CustomerName"));
+                c.put("phone", rs.getString("ContactNumber"));
+                c.put("email", rs.getString("Email"));
+                custList.add(c);
+            }
         }
-
         
         request.setAttribute("custList", custList);
-        conn.close();
-    } catch (Exception e) { message = "Error: " + e.getMessage(); }
+        
+    } catch (Exception e) { 
+        message = "Error: " + e.getMessage(); 
+    }
 %>
 
 <!DOCTYPE html>

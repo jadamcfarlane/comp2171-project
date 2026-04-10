@@ -1,15 +1,16 @@
 <%@ page import="java.sql.*, javax.servlet.*, javax.servlet.http.*" %>
+<%@ page import="java.io.*" %>
+<%@ include file="config.jsp" %>
 
 <%
-    HttpSession sessionObj = request.getSession(false);
-    if (sessionObj != null && sessionObj.getAttribute("username") != null) {
-        String username = (String) sessionObj.getAttribute("username");
 
-        Object userIdObj = sessionObj.getAttribute("userId");
+    if (sessionObj != null && sessionObj.getAttribute("username") != null) {
+        
+        String username = (String) sessionObj.getAttribute("username");
+        Object userIdObj = sessionObj.getAttribute("userid"); 
         int userId = (userIdObj != null) ? (Integer)userIdObj : 0;
 
         String sourcePage = request.getParameter("from");
-
         if(sourcePage == null || sourcePage.isEmpty()) {
             String referer = request.getHeader("referer");
             if (referer != null) {
@@ -20,13 +21,8 @@
         }
 
         String ipAddress = request.getRemoteAddr();
-
-        String connStr = "jdbc:sqlserver://DESKTOP-KIRN4D4\\SQLEXPRESS;databaseName=Aquasol;encrypt=false;integratedSecurity=true";
         
         try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            Connection conn = DriverManager.getConnection(connStr);
-            
             String sql = "INSERT INTO UserLoginActivity (UserID, UserName, ActivityType, ActivityDescription, ActivityTime, IPAddress) " +
                          "VALUES (?, ?, 'LOGOUT', ?, GETDATE(), ?)";
             
@@ -37,14 +33,16 @@
             ps.setString(4, ipAddress);
             ps.executeUpdate();
             
-            conn.close();
+            ps.close();
+            if (conn != null) conn.close(); 
+            
         } catch (Exception e) {
              e.printStackTrace(); 
         }
-
         sessionObj.invalidate();
         response.sendRedirect("login.jsp");
         return;
+    } else {
+        response.sendRedirect("login.jsp");
     }
-    
 %>
