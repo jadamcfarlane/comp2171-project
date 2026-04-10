@@ -7,8 +7,19 @@
 
 <%
 HttpSession sessionObj = request.getSession(false);
+int loggedInUserID = 0;
 
-if (sessionObj == null || sessionObj.getAttribute("username") == null) {
+String fromPage = request.getParameter("from");
+    if (fromPage == null || fromPage.isEmpty()) {
+        fromPage = "UPOS";
+    }
+
+if (sessionObj != null && sessionObj.getAttribute("username") != null) {
+    Object uid = sessionObj.getAttribute("userid");
+    if (uid != null) {
+        loggedInUserID = (int)uid;
+    }
+} else {
     response.sendRedirect("login.jsp");
     return;
 }
@@ -28,10 +39,19 @@ String connStr =
 
 java.util.List<Map<String,Object>> items = null;
 
+java.util.List<String[]> activeCustomers = new ArrayList<>();
+
+ResultSet rs = null;
+
 try {
 
 Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 Connection con = DriverManager.getConnection(connStr);
+
+rs = con.createStatement().executeQuery("SELECT CustomerID, CustomerName FROM Customers ORDER BY CustomerName");
+        while(rs.next()) {
+            activeCustomers.add(new String[]{rs.getString("CustomerID"), rs.getString("CustomerName")});
+        }
 
 if ("search".equals(action)) {
 
@@ -42,7 +62,7 @@ if ("search".equals(action)) {
 
     ps.setString(1,"%"+search+"%");
 
-    ResultSet rs = ps.executeQuery();
+    rs = ps.executeQuery();
 
     items = new ArrayList<>();
 
@@ -56,9 +76,6 @@ if ("search".equals(action)) {
 
         items.add(item);
     }
-
-    rs.close();
-    ps.close();
 }
 
 
@@ -71,7 +88,7 @@ if ("add".equals(action)) {
 
     ps.setInt(1,id);
 
-    ResultSet rs = ps.executeQuery();
+    rs = ps.executeQuery();
 
     if(rs.next()){
 
@@ -148,6 +165,10 @@ if("new".equals(action)){
 }
 
 if ("checkout".equals(action)) {
+
+    String selectedCustId = request.getParameter("selectedCustomerId");
+    int custId = (selectedCustId != null) ? Integer.parseInt(selectedCustId) : 0;
+
     if (cart == null || cart.isEmpty()) {
         out.println("<script>alert('Cart is empty');</script>");
     } else {
@@ -193,13 +214,15 @@ if ("checkout".equals(action)) {
 
                 // DB: Sales
                 PreparedStatement psSales = con.prepareStatement(
-                    "INSERT INTO Sales (ReceiptNo, ItemID, Qty, Price, Total, DateSold, ReceiptHTML) VALUES (?, ?, ?, ?, ?, GETDATE(), '')"
+                    "INSERT INTO Sales (ReceiptNo, ItemID, Qty, Price, Total, DateSold, ReceiptHTML, CustomerID, UserID) VALUES (?, ?, ?, ?, ?, GETDATE(), '', ?, ?)"
                 );
                 psSales.setString(1, receiptNo);
                 psSales.setInt(2, itemId);
                 psSales.setInt(3, qty);
                 psSales.setDouble(4, price);
                 psSales.setDouble(5, total);
+                psSales.setInt(6, custId);
+                psSales.setInt(7, loggedInUserID);
                 psSales.executeUpdate();
                 psSales.close();
 
@@ -322,6 +345,15 @@ sessionObj.setAttribute("cart",cart);
 <link rel="stylesheet" href="UPOS.css">
 </head>
 
+<header>
+
+<ul class="navigation">
+<li><a href="custhistory.jsp?from=UPOS">Customer History</a></li>
+<li><a href="logout.jsp?from=User POS" >Logout</a></li>
+</ul>
+
+</header>
+
 <body>
 
 <div class="layout">
@@ -330,8 +362,6 @@ sessionObj.setAttribute("cart",cart);
 
 <img src="logo.jpg" style="height:170px;width:220px;">
 <div class="logo">MSOL JAMAICA LTD</div>
-
-<a href="logout.jsp" class="sidebar-btn logout-btn">Logout</a>
 
 <form action="UPOS.jsp" method="post">
 <input type="hidden" name="action" value="new">
@@ -484,33 +514,41 @@ double tax = subtotal * 0.05;
 double grandTotal = subtotal + tax;
 %>
 
-<div class="total-line">
-Subtotal: $<%= subtotal %>
+<div class="total-line">Subtotal: $<%= subtotal %>
 </div>
 
-<div class="total-line">
-Tax (5%): $<%= tax %>
+<div class="total-line">Tax (5%): $<%= tax %>
 </div>
 
-<div class="grand-total">
-Total: $<%= grandTotal %>
+<div class="grand-total">Total: $<%= grandTotal %>
 </div>
-
-
-<label>Payment Method</label>
-
-<select name="paymentMethod" form="checkoutForm" class="payment-select">
-<option value="Cash">Cash</option>
-<option value="Card">Card</option>
-<!-- <option value="Mobile">Mobile</option> -->
-</select>
 
 <form id="checkoutForm" action="UPOS.jsp" method="post">
-<input type="hidden" name="action" value="checkout">
-<button class="checkout-btn">Check Out</button>
+        <input type="hidden" name="action" value="checkout">
+        
+        <div class="customer-box">
+            <label>Assign Customer</label>
+            <select name="selectedCustomerId">
+                <option value="0">-- Walk-in Customer --</option>
+                <% for(String[] c : activeCustomers) { %>
+                    <option value="<%= c[0] %>"><%= c[1] %></option>
+                <% } %>
+            </select>
+            <div style="text-align:right; margin-top:4px;">
+                <a href="custcreate.jsp?from=UPOS" target="_blank">+ New Customer</a>
+            </div>
+        </div>
 
-</form>
+        <label>Payment Method</label>
+        <select name="paymentMethod" class="payment-select">
+            <option value="Cash">Cash</option>
+            <option value="Card">Card</option>
+            <!-- <option value="Mobile">Mobile</option> -->
+        </select>
+        
+        <button class="checkout-btn">Check Out</button>
 
+    </form>
 
 <button class="print-btn" onclick="printReceipt()">Print Receipt</button>
 
@@ -527,8 +565,6 @@ if(showReceipt != null && showReceipt){
 <%= sessionObj.getAttribute("receiptHTML") %>
 
 </div>
-
-<button class="print-btn" onclick="printReceipt()">Print Receipt</button>
 
 <%
 }
