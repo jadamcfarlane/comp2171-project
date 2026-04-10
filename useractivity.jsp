@@ -1,47 +1,34 @@
 <%@ page import="java.sql.*, java.util.*" %>
+<%@ include file="config.jsp" %>
 
 <%
-HttpSession sessionObj = request.getSession(false);
+    if (sessionObj == null || sessionObj.getAttribute("username") == null) {
+        response.sendRedirect("login.jsp");
+        return;
+    }
 
-if (sessionObj == null || sessionObj.getAttribute("username") == null) {
-    response.sendRedirect("login.jsp");
-    return;
-}
 
-/* DATABASE CONNECTION */
+    String action = request.getParameter("action");
+    String userId = request.getParameter("userId");
+    String startDate = request.getParameter("startDate");
+    String endDate = request.getParameter("endDate");
 
-String connStr =
-"jdbc:sqlserver://DESKTOP-KIRN4D4\\SQLEXPRESS;databaseName=Aquasol;encrypt=false;integratedSecurity=true";
+    List<String[]> users = new ArrayList<>();
+    List<Map<String,Object>> activities = new ArrayList<>();
 
-/* FORM VALUES */
+    try {
 
-String action = request.getParameter("action");
-String userId = request.getParameter("userId");
-String startDate = request.getParameter("startDate");
-String endDate = request.getParameter("endDate");
 
-/* DATA STRUCTURES */
+        Statement stmt = conn.createStatement();
+        ResultSet rsUsers = stmt.executeQuery("SELECT UserID, UserName FROM Users");
 
-List<String[]> users = new ArrayList<>();
-List<Map<String,Object>> activities = new ArrayList<>();
-
-try {
-    Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-
-    Connection conn = DriverManager.getConnection(connStr);
-
-    /* LOAD USERS */
-    Statement stmt = conn.createStatement();
-    ResultSet rsUsers = stmt.executeQuery("SELECT UserID, UserName FROM Users");
-
-    while(rsUsers.next()) {
-        users.add(new String[]{
+        while(rsUsers.next()) {
+            users.add(new String[]{
             rsUsers.getString("UserID"),
             rsUsers.getString("UserName")
         });
     }
 
-    /* LOAD ACTIVITIES INCLUDING FAILED LOGINS */
     String sql =
         "SELECT ActivityTime, UserName, ActivityType, ActivityDescription, UserID " +
         "FROM UserLoginActivity WHERE 1=1";
@@ -85,10 +72,6 @@ try {
         row.put("desc", rs.getString("ActivityDescription"));
         activities.add(row);
     }
-
-
-
-    conn.close();
 
 } catch(Exception e) {
     e.printStackTrace();
