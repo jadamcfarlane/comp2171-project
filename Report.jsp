@@ -115,8 +115,9 @@ font-weight:bold;
 <ul class="navigation">
 <li><a href="MPOS.jsp">Dashboard</a></li>
 <li><a href="Sales.jsp">Sales</a></li>
+<li><a href="custhistory.jsp?from=MPOS">Customer History</a></li>
 <li><a href="useractivity.jsp">User Activity</a></li>
-<li><a href="login.jsp">Sign Out</a></li>
+<li><a href="logout.jsp?from=Reports">Sign Out</a></li>
 </ul>
 
 </header>
