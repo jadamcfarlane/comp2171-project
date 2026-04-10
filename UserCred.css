@@ -1,0 +1,212 @@
+﻿/* --- Global & Layout --- */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #f0f2f5;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.user-container {
+    width: 480px; /* Slightly wider to accommodate the better table */
+    margin: 50px auto;
+    background: #ffffff; 
+    padding: 35px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+/* --- Navigation Header --- */
+header {
+    background: #fff;
+    padding: 10px 40px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+header ul.navigation {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.navigation li a {
+    text-decoration: none;
+    color: #3E8EDE; 
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: 0.3s;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+header ul.navigation li a:hover {
+    background-color: #3E8EDE;
+    color: white;
+}
+
+/* --- Typography --- */
+h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 30px;
+    color: #333;
+    font-weight: 600;
+}
+
+h3 {
+    margin-top: 40px;
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #444;
+    border-left: 4px solid #3E8EDE;
+    padding-left: 10px;
+}
+
+/* --- Form Elements --- */
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #555;
+    font-size: 14px;
+}
+
+.input {
+    height: 40px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0 12px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background-color: #f9f9f9;
+}
+
+.input:focus {
+    outline: none;
+    border-color: #3E8EDE; 
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(62,142,222,0.1);
+}
+
+/* --- Buttons --- */
+.btn-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.btnsubmit {
+    flex: 1; /* Makes buttons equal width */
+    border: none;
+    height: 42px;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    background-color: #89CFF0; /* Project theme light blue */
+    cursor: pointer;
+    border-radius: 21px;
+    transition: 0.3s;
+}
+
+.btnsubmit:hover {
+     background-color: #3E8EDE; 
+     transform: translateY(-1px);
+}
+
+.btnsubmit.danger {
+    background-color: #ff6b6b; 
+}
+
+.btnsubmit.danger:hover {
+    background-color: #ee5253;
+}
+
+/* --- Messages --- */
+.message {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+    min-height: 20px;
+}
+
+/* --- Modern Table --- */
+.user-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 10px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.user-table th {
+    background-color: #f8f9fa;
+    padding: 12px;
+    text-align: left;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #888;
+    border-bottom: 2px solid #3E8EDE;
+}
+
+.user-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.user-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Row Roles */
+.role-admin { background-color: #fff9f9; }
+.role-user { background-color: #ffffff; }
+
+.user-table tr:hover {
+    background-color: #f0f7ff;
+}
+
+/* Badges */
+.role-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: bold;
+    color: white;
+}
+
+.role-admin .role-badge { background-color: #ff6666; }
+.role-user .role-badge { background-color: #66b3ff; }
+
+/* Action Buttons in Table */
+.edit-btn {
+    background-color: transparent;
+    color: #3E8EDE;
+    border: 1px solid #3E8EDE;
+    padding: 5px 12px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.edit-btn:hover {
+    background-color: #3E8EDE;
+    color: #fff;
+}
+
