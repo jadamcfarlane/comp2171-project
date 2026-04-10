@@ -1,4 +1,47 @@
-﻿body {
+﻿header ul.navigation {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 40px 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+    font-weight: bold;
+    position: relative
+}
+
+header ul.navigation li {
+    display: inline-block;
+}
+
+.navigation li a {
+    text-decoration: none;
+    position: relative;
+    color: #3E8EDE; 
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: 0.3s;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+header ul.navigation li a:hover {
+    background-color: #2c6bb2;
+    color: white;
+}
+
+header ul.navigation li a::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    width: 100%;
+    height: 2px;
+    background: #000;
+    transform: scaleX(0);
+    transition: transform 0.5s ease-in-out;
+}
+
+body {
     margin: 0;
     font-family: Segoe UI, Arial;
     background: #f6f7fb;
@@ -306,6 +349,62 @@
     font-weight: bold;
     margin-top: 15px;
 }
+
+.totals-box label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-top: 18px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.customer-box select, 
+.payment-select {
+    width: 100%;
+    height: 42px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    color: #333;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    appearance: none; 
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%233E8EDE' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+}
+
+.customer-box select:focus, 
+.payment-select:focus {
+    border-color: #3E8EDE;
+    box-shadow: 0 0 0 3px rgba(62, 142, 222, 0.1);
+    outline: none;
+}
+
+.payment-select {
+    border-left: 4px solid #3E8EDE;
+}
+
+.customer-box a {
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: bold;
+    color: #3E8EDE;
+    transition: 0.2s;
+}
+
+.customer-box a:hover {
+    color: #2c6bb2;
+    text-decoration: underline;
+}
+
 
 .print-btn, .checkout-btn {
     width: 100%;
