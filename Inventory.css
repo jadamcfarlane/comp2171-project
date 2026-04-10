@@ -1,0 +1,251 @@
+:root {
+  --bg: #f4f6fb;
+  --card-bg: #ffffff;
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --accent: #16a34a;
+  --border-soft: #e5e7eb;
+  --shadow-soft: 0 10px 25px rgba(15, 23, 42, 0.06);
+  --radius-lg: 18px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  background: var(--bg);
+  color: var(--text-main);
+  padding: 24px;
+}
+
+header ul.navigation {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 40px 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+    font-weight: bold;
+    position: relative
+}
+
+header ul.navigation li {
+    display: inline-block;
+}
+
+.navigation li a {
+    text-decoration: none;
+    position: relative;
+    color: #3E8EDE; 
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: 0.3s;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+header ul.navigation li a:hover {
+    background-color: #2c6bb2;
+    color: white;
+}
+
+header ul.navigation li a::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    width: 100%;
+    height: 2px;
+    background: #000;
+    transform: scaleX(0);
+    transition: transform 0.5s ease-in-out;
+}
+
+
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #ecf0f7;
+  padding: 24px;
+  border-radius: 24px;
+  box-shadow: var(--shadow-soft);
+}
+
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.dashboard-title {
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.add-stock-box {
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.add-stock-box .input-box {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.btn-add {
+    background: #0066cc;
+    color: #fff;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.stock-meta {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #222;
+}
+
+.kpi-grid {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.kpi-grid-2x2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-soft);
+}
+
+.card-title {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.card-value {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.card-subrow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.card-change {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.card-change::before {
+  content: "↑";
+  margin-right: 3px;
+}
+
+.card-compare {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.inventory-summary {
+    margin-top: 16px;
+    max-height: 300px; 
+    overflow-y: auto;
+}
+
+.stock-card {
+    width: 200px;
+    padding: 15px;
+    border-radius: 12px;
+    margin: 10px;
+    color: white;
+    font-family: Arial;
+    display: inline-block;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.stock-critical {
+    background-color: #e74c3c; 
+}
+
+.stock-low {
+    background-color: #f1c40f; 
+    color: black;
+}
+
+.stock-safe {
+    background-color: #2ecc71; 
+}
+
+.stock-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.stock-qty {
+    font-size: 16px;
+    margin-top: 8px;
+}
+
+.kpi-large {
+  padding: 26px 28px;
+  min-height: 150px;
+}
+
+.kpi-large .card-value {
+  font-size: 40px;
+}
+
+.kpi-large .card-title {
+  font-size: 15px;
+}
+
+.kpi-large .card-compare {
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .kpi-grid-2x2 {
+    grid-template-columns: 1fr; 
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 16px;
+  }
+
+  .dashboard {
+    padding: 18px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
