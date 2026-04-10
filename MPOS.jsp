@@ -8,6 +8,11 @@
 <%
 HttpSession sessionObj = request.getSession(false);
 
+String fromPage = request.getParameter("from");
+    if (fromPage == null || fromPage.isEmpty()) {
+        fromPage = "MPOS";
+    }
+
 if (sessionObj == null || sessionObj.getAttribute("username") == null) {
     response.sendRedirect("login.jsp");
     return;
@@ -28,12 +33,21 @@ String connStr =
 
 java.util.List<Map<String,Object>> items = null;
 
+java.util.List<String[]> activeCustomers = new ArrayList<>();
+
+ResultSet rs = null;
+
 try {
 
 Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 Connection con = DriverManager.getConnection(connStr);
 
-/* SEARCH */
+rs = con.createStatement().executeQuery("SELECT CustomerID, CustomerName FROM Customers ORDER BY CustomerName");
+        while(rs.next()) {
+            activeCustomers.add(new String[]{rs.getString("CustomerID"), rs.getString("CustomerName")});
+        }
+
+// SEARCH
 
 if ("search".equals(action)) {
 
@@ -44,7 +58,7 @@ if ("search".equals(action)) {
 
     ps.setString(1,"%"+search+"%");
 
-    ResultSet rs = ps.executeQuery();
+    rs = ps.executeQuery();
 
     items = new ArrayList<>();
 
@@ -58,12 +72,9 @@ if ("search".equals(action)) {
 
         items.add(item);
     }
-
-    rs.close();
-    ps.close();
 }
 
-/* ADD ITEM */
+// ADD ITEM 
 
 if ("add".equals(action)) {
 
@@ -74,7 +85,7 @@ if ("add".equals(action)) {
 
     ps.setInt(1,id);
 
-    ResultSet rs = ps.executeQuery();
+    rs = ps.executeQuery();
 
     if(rs.next()){
 
@@ -122,7 +133,7 @@ if ("add".equals(action)) {
     ps.close();
 }
 
-/* UPDATE */
+// UPDATE 
 
 if("update".equals(action)){
 
@@ -138,7 +149,7 @@ if("update".equals(action)){
     }
 }
 
-/* REMOVE */
+// REMOVE
 
 if("remove".equals(action)){
 
@@ -147,7 +158,7 @@ if("remove".equals(action)){
     cart.removeIf(i -> (int)i.get("id")==id);
 }
 
-/* NEW ORDER */
+// NEW ORDER
 if("new".equals(action)){
     cart.clear();
     sessionObj.removeAttribute("showReceipt");
@@ -155,8 +166,12 @@ if("new".equals(action)){
     sessionObj.removeAttribute("lastCart");
 }
 
-/* CHECKOUT */
+// CHECKOUT
 if ("checkout".equals(action)) {
+
+    String selectedCustId = request.getParameter("selectedCustomerId");
+    int custId = (selectedCustId != null) ? Integer.parseInt(selectedCustId) : 0;
+
     if (cart == null || cart.isEmpty()) {
         out.println("<script>alert('Cart is empty');</script>");
     } else {
@@ -172,7 +187,7 @@ if ("checkout".equals(action)) {
             StringBuilder sb = new StringBuilder();
             double subtotal = 0;
 
-            /* HEADER */
+            // HEADER
             sb.append("<div style='text-align:center;'>");
             sb.append("<img src='" + request.getContextPath() + "/logo.jpg' style='width:120px'><br>");
             sb.append("<h2>MSOL JAMAICA LTD</h2>");
@@ -203,13 +218,14 @@ if ("checkout".equals(action)) {
 
                 // DB: Sales
                 PreparedStatement psSales = con.prepareStatement(
-                    "INSERT INTO Sales (ReceiptNo, ItemID, Qty, Price, Total, DateSold, ReceiptHTML) VALUES (?, ?, ?, ?, ?, GETDATE(), '')"
+                    "INSERT INTO Sales (ReceiptNo, ItemID, Qty, Price, Total, DateSold, ReceiptHTML, CustomerID) VALUES (?, ?, ?, ?, ?, GETDATE(), '', ?)"
                 );
                 psSales.setString(1, receiptNo);
                 psSales.setInt(2, itemId);
                 psSales.setInt(3, qty);
                 psSales.setDouble(4, price);
                 psSales.setDouble(5, total);
+                psSales.setDouble(6, custId);
                 psSales.executeUpdate();
                 psSales.close();
 
@@ -261,7 +277,7 @@ if ("checkout".equals(action)) {
     }
 }
 
-/* RECEIPT */
+// RECEIPT
 if("receipt".equals(action)){
     
     java.util.List<Map<String,Object>> lastCart=
@@ -331,15 +347,15 @@ sessionObj.setAttribute("cart",cart);
 
 <div class="logo">MSOL JAMAICA LTD</div>
 
-<a href="login.jsp" class="sidebar-btn logout-btn">Logout</a>
+<a href="logout.jsp?from=Manager Dashboard" class="sidebar-btn logout-btn">Logout</a>
 
 <form action="MPOS.jsp" method="post">
-<input type="hidden" name="action" value="new">
-<button class="sidebar-btn">+ New Order</button>
+    <input type="hidden" name="action" value="new">
+    <button class="sidebar-btn">+ New Order</button>
 </form>
 
 <div class="user-box">
-<strong>Manager</strong>
+    <strong>Manager</strong>
 </div>
 
 </div>
@@ -349,27 +365,33 @@ sessionObj.setAttribute("cart",cart);
 <div class="cards">
 
 <div class="card babyblue">
-<div class="icon"><img src="sales.png"></div>
-<div class="content">Sales Overview</div>
-<a href="Sales.jsp" class="btnsubmit">CLICK HERE</a>
+    <div class="icon"><img src="sales.png"></div>
+    <div class="content">Sales Overview</div>
+    <a href="Sales.jsp" class="btnsubmit"> CLICK HERE</a>
+</div>
+
+<div class="card babyblue">
+    <div class="icon"><img src="custhistory.png"></div>
+    <div class="content">Customer History</div>
+    <a href="custhistory.jsp?from=MPOS" class="btnsubmit"> CLICK HERE</a>
 </div>
 
 <div class="card mayablue">
-<div class="icon"><img src="inventory.png"></div>
-<div class="content">Inventory Overview</div>
-<a href="inventory.jsp" class="btnsubmit">CLICK HERE</a>
+    <div class="icon"><img src="inventory.png"></div>
+    <div class="content">Inventory Overview</div>
+<a href="inventory.jsp" class="btnsubmit"> CLICK HERE</a>
 </div>
 
 <div class="card argentianblue">
-<div class="icon"><img src="reports.png"></div>
-<div class="content">Reports</div>
-<a href="Report.jsp" class="btnsubmit">GENERATE REPORT</a>
+    <div class="icon"><img src="reports.png"></div>
+    <div class="content">Reports</div>
+    <a href="Report.jsp" class="btnsubmit"> GENERATE REPORT</a>
 </div>
 
 <div class="card tuftsblue">
-<div class="icon"><img src="credentials.png"></div>
-<div class="content">User Credentials</div>
-<a href="usercred.jsp" class="btnsubmit">CLICK HERE</a>
+    <div class="icon"><img src="credentials.png"></div>
+    <div class="content">User Credentials</div>
+    <a href="usercred.jsp" class="btnsubmit"> CLICK HERE</a>
 </div>
 
 </div>
@@ -381,36 +403,36 @@ sessionObj.setAttribute("cart",cart);
 <h2>New Order</h2>
 
 <form action="MPOS.jsp" method="post">
-<input type="hidden" name="action" value="search">
-<input type="text" name="search" class="search-input" placeholder="Search items...">
-<button class="search-btn">Search</button>
+    <input type="hidden" name="action" value="search">
+    <input type="text" name="search" class="search-input" placeholder="Search items...">
+    <button class="search-btn">Search</button>
 </form>
 
 <table class="grid-items">
 
 <tr>
-<th>Item</th>
-<th>Price</th>
-<th>Action</th>
+    <th>Item</th>
+    <th>Price</th>
+    <th>Action</th>
 </tr>
 
 <%
 
 if(items!=null){
-for(Map<String,Object> item : items){
+    for(Map<String,Object> item : items){
 %>
 
 <tr>
-<td><%=item.get("name")%></td>
-<td>$<%=item.get("price")%></td>
+    <td><%=item.get("name")%></td>
+    <td>$<%=item.get("price")%></td>
 
-<td>
-<form action="MPOS.jsp" method="post">
-<input type="hidden" name="action" value="add">
-<input type="hidden" name="id" value="<%=item.get("id")%>">
-<button>Add</button>
-</form>
-</td>
+    <td>
+        <form action="MPOS.jsp" method="post">
+            <input type="hidden" name="action" value="add">
+            <input type="hidden" name="id" value="<%=item.get("id")%>">
+            <button>Add</button>
+        </form>
+    </td>
 </tr>
 
 <%
@@ -424,11 +446,11 @@ for(Map<String,Object> item : items){
 <table class="gv-container">
 
 <tr>
-<th>Item</th>
-<th>Qty</th>
-<th>Price</th>
-<th>Total</th>
-<th>Action</th>
+    <th>Item</th>
+    <th>Qty</th>
+    <th>Price</th>
+    <th>Total</th>
+    <th>Action</th>
 </tr>
 
 <%
@@ -448,23 +470,23 @@ subtotal+=total;
 <td><%=item.get("name")%></td>
 
 <td>
-<form action="MPOS.jsp" method="post">
-<input type="hidden" name="action" value="update">
-<input type="hidden" name="id" value="<%=item.get("id")%>">
-<input type="number" name="qty" value="<%=qty%>" min="1">
-<button>Update</button>
-</form>
+    <form action="MPOS.jsp" method="post">
+        <input type="hidden" name="action" value="update">
+        <input type="hidden" name="id" value="<%=item.get("id")%>">
+        <input type="number" name="qty" value="<%=qty%>" min="1">
+        <button>Update</button>
+    </form>
 </td>
 
 <td>$<%=price%></td>
 <td>$<%=total%></td>
 
 <td>
-<form action="MPOS.jsp" method="post">
-<input type="hidden" name="action" value="remove">
-<input type="hidden" name="id" value="<%=item.get("id")%>">
-<button>Remove</button>
-</form>
+    <form action="MPOS.jsp" method="post">
+        <input type="hidden" name="action" value="remove">
+        <input type="hidden" name="id" value="<%=item.get("id")%>">
+        <button>Remove</button>
+    </form>
 </td>
 
 </tr>
@@ -482,36 +504,47 @@ subtotal+=total;
 <h3>Summary</h3>
 
 <%
-double tax=subtotal*0.05;
-double grandTotal=subtotal+tax;
+double tax = subtotal * 0.05;
+double grandTotal = subtotal + tax;
 %>
 
-<div class="total-line">
-Subtotal: $<%=subtotal%>
+<div class="total-line">Subtotal: $<%=subtotal%>
 </div>
 
-<div class="total-line">
-Tax (5%): $<%=tax%>
+<div class="total-line">Tax (5%): $<%=tax%>
 </div>
 
-<div class="grand-total">
-Total: $<%=grandTotal%>
+<div class="grand-total">Total: $<%=grandTotal%>
 </div>
-
-<label>Payment Method</label>
-
-<select name="paymentMethod" form="checkoutForm" class="payment-select">
-<option value="Cash">Cash</option>
-<option value="Card">Card</option>
-<!-- <option value="Mobile">Mobile</option> -->
-</select>
-
-<!-- CHECKOUT BUTTON -->
 
 <form id="checkoutForm" action="MPOS.jsp" method="post">
-<input type="hidden" name="action" value="checkout">
-<button class="checkout-btn">Check Out</button>
-</form>
+        <input type="hidden" name="action" value="checkout">
+        
+        <div class="customer-box">
+            <label>Assign Customer</label>
+            <select name="selectedCustomerId">
+                <option value="0">-- Walk-in Customer --</option>
+                <% for(String[] c : activeCustomers) { %>
+                    <option value="<%= c[0] %>"><%= c[1] %></option>
+                <% } %>
+            </select>
+            <div style="text-align:right; margin-top:4px;">
+                <a href="custcreate.jsp?from=MPOS" target="_blank">+ New Customer</a>
+            </div>
+        </div>
+
+        <label>Payment Method</label>
+        <select name="paymentMethod" class="payment-select">
+            <option value="Cash">Cash</option>
+            <option value="Card">Card</option>
+            <!-- <option value="Mobile">Mobile</option> -->
+        </select>
+
+        <form id="checkoutForm" action="MPOS.jsp" method="post">
+        <input type="hidden" name="action" value="checkout">
+        <button class="checkout-btn">Check Out</button>
+
+    </form>
 
 <!-- PRINT RECEIPT -->
 
@@ -529,9 +562,7 @@ if(showReceipt != null && showReceipt){
 
 <%= sessionObj.getAttribute("receiptHTML") %>
 
-<!-- PRINT RECEIPT -->
 
-<button class="print-btn" onclick="printReceipt()">Print Receipt</button>
 
 </div>
 
